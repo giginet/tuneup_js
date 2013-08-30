@@ -57,7 +57,7 @@ private
     assertionResult = false
 
     #imagemagick outputs floating point metrics value when succeeds
-    if /([0-9]*\.[0-9]+)\ \(([0-9.]+)\)/ =~ stderr
+    if /([0-9]*\.[0-9]+)\ \(([0-9.\-+e]+)\)/ =~ stderr
       if $2.to_f <= threshold.to_f
 
         result_status   = 'passed'
