@@ -6,7 +6,7 @@ class ImageAssertion
   MAX_ALLOWED_DIFF_PERCENTAGE = 0.03
   DIFF_IMAGE_FOLDER_NAME  = 'screens_diff'
 
-  def self.assert_image(test_output, ref_images_path, image_name)
+  def self.assert_image(test_output, ref_images_path, image_name, threshold)
 
     return false unless (test_output && ref_images_path && image_name)
 
@@ -31,7 +31,7 @@ class ImageAssertion
     else
 
       result = im_compare(expected_path, received_path, diff_path)
-      return process_imagemagick_result(image_file_name, result)
+      return process_imagemagick_result(image_file_name, result, threshold)
     end
   end
 
@@ -50,7 +50,7 @@ private
     end[0]
   end
 
-  def self.process_imagemagick_result(image_file_name, stderr)
+  def self.process_imagemagick_result(image_file_name, stderr, threshold)
 
     result_status   = 'failed'
     result_message  = "#{image_file_name} is not equal to the reference."
@@ -58,11 +58,13 @@ private
 
     #imagemagick outputs floating point metrics value when succeeds
     if /([0-9]*\.[0-9]+)\ \(([0-9.]+)\)/ =~ stderr
-      if $2.to_f < MAX_ALLOWED_DIFF_PERCENTAGE
+      if $2.to_f <= threshold.to_f
 
         result_status   = 'passed'
         result_message  = "#{image_file_name} asserted successfully."
         assertionResult = true
+      else
+        print_status(create_status(result_status, "expected 'notmalized' is smaller than #{threshold} but #{$2}"))
       end
     else
 
