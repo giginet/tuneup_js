@@ -3,7 +3,7 @@ require 'shellwords'
 
 class ImageAssertion
 
-  MAX_ALLOWED_DIFF_VALUE  = 1.0
+  MAX_ALLOWED_DIFF_PERCENTAGE = 0.03
   DIFF_IMAGE_FOLDER_NAME  = 'screens_diff'
 
   def self.assert_image(test_output, ref_images_path, image_name)
@@ -57,10 +57,8 @@ private
     assertionResult = false
 
     #imagemagick outputs floating point metrics value when succeeds
-    compare_succeed = ( stderr.match(/[0-9]*\.?[0-9]+/).length > 0 )
-
-    if compare_succeed
-      if stderr.to_f < MAX_ALLOWED_DIFF_VALUE
+    if /([0-9]*\.[0-9]+)\ \(([0-9.]+)\)/ =~ stderr
+      if $2.to_f < MAX_ALLOWED_DIFF_PERCENTAGE
 
         result_status   = 'passed'
         result_message  = "#{image_file_name} asserted successfully."
